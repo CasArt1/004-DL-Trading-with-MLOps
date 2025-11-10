@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data and models (mounted as volumes)
+data/
+models/
+reports/
+mlruns/
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# Notebooks
+notebooks/
+*.ipynb
+
+# OS
+.DS_Store
+Thumbs.db
