@@ -60,15 +60,33 @@ class ModelPredictor:
     def load_model(self, model_path: str = "models/best_cnn_model.keras", 
                    scaler_path: str = "models/best_cnn_model_scaler.pkl"):
         """Load the trained model and scaler."""
-        if not os.path.exists(model_path):
+        # Validate and sanitize paths to prevent path traversal attacks
+        allowed_base = os.path.abspath("models")
+        
+        # Resolve absolute paths and check they're within allowed directory
+        abs_model_path = os.path.abspath(model_path)
+        abs_scaler_path = os.path.abspath(scaler_path)
+        
+        if not abs_model_path.startswith(allowed_base):
+            raise ValueError("Model path must be within the models directory")
+        
+        if not abs_scaler_path.startswith(allowed_base):
+            raise ValueError("Scaler path must be within the models directory")
+        
+        if not os.path.exists(abs_model_path):
             raise FileNotFoundError(f"Model not found at {model_path}")
         
-        if not os.path.exists(scaler_path):
+        if not os.path.exists(abs_scaler_path):
             raise FileNotFoundError(f"Scaler not found at {scaler_path}")
         
         try:
-            self.model = keras.models.load_model(model_path)
-            self.scaler = joblib.load(scaler_path)
+            self.model = keras.models.load_model(abs_model_path)
+            # Note: joblib.load can execute arbitrary code from pickle files.
+            # Only load scaler files from trusted sources. In production, consider
+            # using a safer serialization format like JSON or ONNX for the scaler.
+            # The path validation above ensures only files in the models/ directory
+            # can be loaded, which should only contain trusted model artifacts.
+            self.scaler = joblib.load(abs_scaler_path)
             self.model_loaded = True
             print(f"Model loaded successfully from {model_path}")
         except Exception as e:
@@ -223,15 +241,26 @@ async def load_model(model_path: str = "models/best_cnn_model.keras",
     Load or reload the model.
     
     Args:
-        model_path: Path to the model file
-        scaler_path: Path to the scaler file
+        model_path: Path to the model file (must be within models/ directory)
+        scaler_path: Path to the scaler file (must be within models/ directory)
     
     Returns:
         Status message
     """
     try:
+        # Additional validation to reject path traversal attempts
+        if ".." in model_path or ".." in scaler_path:
+            raise HTTPException(status_code=400, detail="Path traversal not allowed")
+        
+        if not model_path.startswith("models/") or not scaler_path.startswith("models/"):
+            raise HTTPException(status_code=400, detail="Paths must be within models/ directory")
+        
         predictor.load_model(model_path, scaler_path)
         return {"status": "success", "message": "Model loaded successfully"}
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
