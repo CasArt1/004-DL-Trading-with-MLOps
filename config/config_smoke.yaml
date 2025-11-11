@@ -1,0 +1,57 @@
+﻿# Smoke test config - runs 1 epoch for quick verification
+data:
+  asset_symbol: "NVDA"
+  start_date: "2010-11-10"
+  end_date: "2025-11-10"
+  train_split: 0.6
+  test_split: 0.2
+  val_split: 0.2
+
+features:
+  min_features: 20
+  lookback_window: 60
+  feature_groups:
+    - momentum
+    - volatility
+    - volume
+  normalization: "standard"
+
+labeling:
+  buy_threshold: 0.02
+  sell_threshold: -0.02
+  forward_days: 5
+
+model:
+  type: "cnn"
+  input_shape: [60, 20, 1]
+  filters: [32, 64, 128]
+  kernel_sizes: [3, 3, 3]
+  pool_size: 2
+  dropout_rate: 0.3
+  dense_units: [128, 64]
+  output_classes: 3
+
+training:
+  batch_size: 8
+  epochs: 1
+  learning_rate: 0.001
+  early_stopping_patience: 2
+  class_weights: "auto"
+  validation_split: 0.1
+
+mlflow:
+  experiment_name: "cnn-trading-smoke"
+  tracking_uri: "./mlruns"
+  log_models: false
+
+backtesting:
+  initial_capital: 100000
+  position_size: 0.1
+  stop_loss: 0.02
+  take_profit: 0.05
+  commission_rate: 0.00125
+  borrow_rate: 0.0025
+
+monitoring:
+  significance_level: 0.05
+  top_n_features: 5

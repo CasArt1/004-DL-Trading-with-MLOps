@@ -1,0 +1,14 @@
+{
+  "initial_capital": 100000.0,
+  "final_value": 99833.07802114844,
+  "total_return": -0.0016692197885156202,
+  "annualized_return": -0.0006535050852194413,
+  "sharpe_ratio": -0.04587348039210139,
+  "max_drawdown": -0.01764652202861347,
+  "calmar_ratio": 0.09459199868444415,
+  "win_rate": 0.16666666666666666,
+  "total_trades": 30,
+  "total_commissions": 375.0551279985904,
+  "total_borrow_costs": 0.0,
+  "trading_days": 644
+}

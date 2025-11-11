@@ -1,0 +1,67 @@
+# Configuration file for the trading strategy project
+
+# Data Configuration
+data:
+  asset_symbol: "NVDA"  # NVIDIA stock
+  start_date: "2010-11-10"  # 15 years of data
+  end_date: "2025-11-10"
+  train_split: 0.6
+  test_split: 0.2
+  val_split: 0.2
+
+# Feature Engineering
+features:
+  min_features: 20
+  lookback_window: 60  # Days to look back for temporal patterns
+  feature_groups:
+    - momentum
+    - volatility
+    - volume
+  normalization: "standard"  # or "minmax"
+
+# Label Generation
+labeling:
+  buy_threshold: 0.02  # 2% gain for BUY signal
+  sell_threshold: -0.02  # 2% loss for SELL signal
+  forward_days: 5  # Look forward N days for returns
+
+# Model Configuration
+model:
+  type: "cnn"
+  input_shape: [60, 20, 1]  # [lookback, features, channels]
+  filters: [32, 64, 128]  # BASELINE: Original working configuration
+  kernel_sizes: [3, 3, 3]
+  pool_size: 2
+  dropout_rate: 0.3  # BASELINE: Original working configuration
+  dense_units: [128, 64]
+  output_classes: 3  # buy, sell, hold
+  
+# Training Configuration
+training:
+  batch_size: 36  # BASELINE: Original working configuration
+  epochs: 100
+  learning_rate: 0.001  # BASELINE: Original working configuration
+  early_stopping_patience: 10
+  class_weights: "auto"  # or specify {0: 1.0, 1: 2.0, 2: 1.5}
+  validation_split: 0.2
+
+# MLFlow Configuration
+mlflow:
+  experiment_name: "cnn-trading-strategy"
+  tracking_uri: "./mlruns"
+  log_models: true
+
+# Backtesting Configuration
+backtesting:
+  initial_capital: 100000
+  position_size: 0.1  # 10% of capital per trade
+  stop_loss: 0.02  # 2%
+  take_profit: 0.05  # 5%
+  commission_rate: 0.00125  # 0.125%
+  borrow_rate: 0.0025  # 0.25% annualized (divide by 252 for daily)
+  confidence_threshold: 0.5  # BASELINE: 60% threshold - proven to work well (36 trades, -2.48% return)
+
+# Drift Monitoring
+monitoring:
+  significance_level: 0.05  # For KS-test
+  top_n_features: 5  # Show top N drifted features
